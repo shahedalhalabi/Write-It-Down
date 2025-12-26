@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:write_it_down/models/database.dart';
 import 'package:write_it_down/models/group.dart';
 import 'package:write_it_down/models/thought.dart';
+import 'gemini.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -22,10 +23,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final db = Provider.of<Database>(context, listen: false);
 
-    void addThought() {
-      db.newThought("My Group", currentText.text, "my description");
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -39,7 +36,7 @@ class _HomePageState extends State<HomePage> {
               TextField(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Add your new ToDo!",
+                    hintText: "Add your thought!",
                     suffixIcon: IconButton(onPressed: (){currentText.clear();}, icon: Icon(Icons.clear)),
                   ),
                   controller: currentText,
@@ -69,7 +66,7 @@ class _HomePageState extends State<HomePage> {
                               Text(groups[index].name),
                               Expanded(
                                 child: StreamBuilder(
-                                  stream: db.isar.thoughts.where().watch(fireImmediately: true), 
+                                  stream: db.isar.thoughts.filter().group((q) {return q.idEqualTo(groups[index].id);}).watch(fireImmediately: true),
                                   builder: (context, snapshot) {
                                     if (!snapshot.hasData) {
                                       return const Center(child: CircularProgressIndicator());
@@ -99,12 +96,13 @@ class _HomePageState extends State<HomePage> {
               ),
             ]
           ),
-
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          addThought();
+        onPressed: () async{
+          List<String> groups = await db.currentGroups();
+          final group = await Gemini.group(groups, currentText.text);
+          db.newThought(group, currentText.text, "my description");
           currentText.clear();
         },
         tooltip: 'Increment',

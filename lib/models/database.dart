@@ -55,6 +55,9 @@ class Database extends ChangeNotifier{
     });
     notifyListeners();
   }
-  
+
+  Future<List<String>> currentGroups() async{
+    return await isar.groups.where().nameProperty().findAll();
+  }
   
 }
