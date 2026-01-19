@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
-import 'package:provider/provider.dart';
-import 'package:write_it_down/models/database.dart';
-import 'package:write_it_down/models/group.dart';
-import 'package:write_it_down/models/thought.dart';
 import 'gemini.dart';
+import 'package:write_it_down/models/firestore.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -21,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   
   @override
   Widget build(BuildContext context) {
-    final db = Provider.of<Database>(context, listen: false);
+    //final db = Provider.of<Database>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -44,12 +40,12 @@ class _HomePageState extends State<HomePage> {
                 ),
               Expanded(
                 child: StreamBuilder(
-                  stream: db.isar.groups.where().watch(fireImmediately: true), 
+                  stream: FirestoreService().groupsRef.snapshots(), 
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    final groups = snapshot.data!;
+                    final groups = snapshot.data!.docs;
 
                     return ListView.builder(
                       itemCount: groups.length,
@@ -63,24 +59,24 @@ class _HomePageState extends State<HomePage> {
                         ),
                           child: Column(
                             children: [
-                              Text(groups[index].name),
+                              Text(groups[index]["name"]),
                               Expanded(
                                 child: StreamBuilder(
-                                  stream: db.isar.thoughts.filter().group((q) {return q.idEqualTo(groups[index].id);}).watch(fireImmediately: true),
+                                  stream: groups[index].reference.collection("thoughts").snapshots(),
                                   builder: (context, snapshot) {
                                     if (!snapshot.hasData) {
                                       return const Center(child: CircularProgressIndicator());
                                     }
-                                    final thoughts = snapshot.data!;
+                                    final thoughts = snapshot.data!.docs;
 
                                     return ListView.builder(
                                       itemCount: thoughts.length,
                                       itemBuilder: (context, index) {
                                         return CheckboxListTile(
-                                            title: Text(thoughts[index].content),
-                                            value: thoughts[index].isCompleted,
-                                            onChanged: (bool? value) async {
-                                              await db.toggleThought(thoughts[index]);
+                                            title: Text(thoughts[index]["content"]),
+                                            value: thoughts[index]["isCompleted"],
+                                            onChanged: (bool? value)  {
+                                              
                                             },
                                           );
                                         },
@@ -100,9 +96,9 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async{
-          List<String> groups = await db.currentGroups();
+          List<String> groups = await FirestoreService().currentGroups();
           final group = await Gemini.group(groups, currentText.text);
-          db.newThought(group, currentText.text, "my description");
+          FirestoreService().newThought(group, currentText.text, "my description");
           currentText.clear();
         },
         tooltip: 'Increment',

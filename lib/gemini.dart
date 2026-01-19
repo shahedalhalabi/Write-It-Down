@@ -1,7 +1,7 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class Gemini {
-  static const apikey = "";
+  static const apikey = "AIzaSyBga7xh3_9a6oi6y8aeLwL7zulSnZxJKjc";
   static final model = GenerativeModel (
     apiKey: apikey, 
     model: "gemini-2.5-flash-lite",
@@ -29,18 +29,18 @@ class Gemini {
 
     final response = await model.generateContent(prompt);
     
-    //print("AI raw response: ${response.text}");
+    print("AI raw response: ${response.text}");
 
     if (response.text != null && response.text!.trim().isNotEmpty) {
       return response.text!.trim();
     } 
     else {
-      //print("AI returned empty text");
+      print("AI returned empty text");
       return "General";
     }
   } 
   catch (e) {
-    //print("Caught an actual error: $e");
+    print("Caught an actual error: $e");
     return "General";
   }
 }

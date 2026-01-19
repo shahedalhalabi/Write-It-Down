@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "7955765353",
+    "project_id": "write-it-down-e07e5",
+    "storage_bucket": "write-it-down-e07e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:7955765353:android:58cba3ad329bdd66762af8",
+        "android_client_info": {
+          "package_name": "com.example.write_it_down"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCm3FC6Thu8JXuKqDBDmyHBawKQxp590J0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

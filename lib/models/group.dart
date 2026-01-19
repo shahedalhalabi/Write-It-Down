@@ -1,19 +1,16 @@
-import 'package:isar/isar.dart';
-import 'thought.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-part 'group.g.dart';
-
-@collection
 class Group {
-  Id id = Isar.autoIncrement;
   String name;
-  
-  final thoughts = IsarLinks<Thought>();
 
-  
   Group({required this.name});
 
-  void addThought(Thought thought) {
-    thoughts.add(thought);
+  Map<String, dynamic> toFireStore() {
+    return { "name" : name, };
+  }
+
+  factory Group.fromFireStore(DocumentSnapshot<Map<String, dynamic>> snapshot, SnapshotOptions? options) {
+    final data = snapshot.data();
+    return Group(name: data?["name"]);
   }
 }
