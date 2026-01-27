@@ -36,7 +36,9 @@ class FirestoreService extends ChangeNotifier{
     notifyListeners();
   }
 
-  //Future<void> toggleThought()
+  Future<void> toggleThought(DocumentReference<Thought> thoughtRef, bool newStatus) async {
+    await thoughtRef.update({"isCompleted" : newStatus});
+  }
   
   Future<List<String>> currentGroups() async{
     final groupSnapshot = await groupsRef.get();
