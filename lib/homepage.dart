@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'gemini.dart';
 import 'package:write_it_down/models/firestore.dart';
 
@@ -17,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   
   @override
   Widget build(BuildContext context) {
-    //final db = Provider.of<Database>(context, listen: false);
+    final firestore = context.read<FirestoreService>();
 
     return Scaffold(
       appBar: AppBar(
@@ -40,7 +41,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               Expanded(
                 child: StreamBuilder(
-                  stream: FirestoreService().groupsRef.snapshots(), 
+                  stream: firestore.groupsRef.snapshots(), 
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
@@ -62,7 +63,7 @@ class _HomePageState extends State<HomePage> {
                               Text(groups[index]["name"]),
                               Expanded(
                                 child: StreamBuilder(
-                                  stream: groups[index].reference.collection("thoughts").snapshots(),
+                                  stream: firestore.thoughtsRef(groups[index].reference).snapshots(),
                                   builder: (context, snapshot) {
                                     if (!snapshot.hasData) {
                                       return const Center(child: CircularProgressIndicator());
@@ -75,8 +76,8 @@ class _HomePageState extends State<HomePage> {
                                         return CheckboxListTile(
                                             title: Text(thoughts[index]["content"]),
                                             value: thoughts[index]["isCompleted"],
-                                            onChanged: (bool? value)  {
-                                              
+                                            onChanged: (bool? value) async {
+                                              await firestore.toggleThought(thoughts[index].reference, !thoughts[index]["isCompleted"]);
                                             },
                                           );
                                         },
@@ -96,9 +97,9 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async{
-          List<String> groups = await FirestoreService().currentGroups();
+          List<String> groups = await firestore.currentGroups();
           final group = await Gemini.group(groups, currentText.text);
-          FirestoreService().newThought(group, currentText.text, "my description");
+          firestore.newThought(group, currentText.text, "my description");
           currentText.clear();
         },
         tooltip: 'Increment',
