@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'homepage.dart';
+//import 'oldhomepage.dart';
+import 'home_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
@@ -23,14 +24,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Write It Down',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Color.fromRGBO(211, 211, 211, 1)
+          seedColor: Color.fromRGBO(250, 249, 240, 1)
           ).copyWith(
-            primary: Color.fromRGBO(211, 211, 211, 1),
+            primary: Color.fromRGBO(250, 249, 240, 1),
+            secondary: Color.fromRGBO(246, 240, 215, 1),
+            tertiary: Color.fromRGBO(156, 171, 132, 1),
           ),
       ),
-      home: const HomePage(title: 'Write It Down'),
+      home: const HomePage(title: "Write It Down"),
     );
   }
 }

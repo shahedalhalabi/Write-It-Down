@@ -3,16 +3,16 @@ import 'package:provider/provider.dart';
 import 'gemini.dart';
 import 'package:write_it_down/models/firestore.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title});
+class Oldhomepage extends StatefulWidget {
+  const Oldhomepage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Oldhomepage> createState() => _OldhomepageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _OldhomepageState extends State<Oldhomepage> {
 
   var currentText = TextEditingController();
   
@@ -95,16 +95,20 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () async{
           List<String> groups = await firestore.currentGroups();
           final group = await Gemini.group(groups, currentText.text);
           firestore.newThought(group, currentText.text, "my description");
           currentText.clear();
         },
-        tooltip: 'Increment',
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add),
+        backgroundColor: Theme.of(context).colorScheme.primary,  
+        label: Row(
+          children: [
+            Icon(Icons.add_box_rounded),
+            Text("Throw thought"),
+          ],
+        ),
       ),
     );
   }
