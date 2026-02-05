@@ -26,11 +26,11 @@ class FirestoreService extends ChangeNotifier{
     return groupSnapshot.docs.first.reference;
   }
 
-  Future<void> newThought(String groupName, String thoughtContent, String? thoghtDescription) async {
+  Future<void> newThought(String groupName, String thoughtContent, Timestamp thoghtDate) async {
     
     final groupDocRef = await newGroup(groupName);
 
-    final thought = Thought(content: thoughtContent, description: thoghtDescription);
+    final thought = Thought(content: thoughtContent, date: thoghtDate);
     await thoughtsRef(groupDocRef).add(thought);
     
     notifyListeners();

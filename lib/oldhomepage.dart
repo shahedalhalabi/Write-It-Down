@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'gemini.dart';
@@ -99,7 +100,7 @@ class _OldhomepageState extends State<Oldhomepage> {
         onPressed: () async{
           List<String> groups = await firestore.currentGroups();
           final group = await Gemini.group(groups, currentText.text);
-          firestore.newThought(group, currentText.text, "my description");
+          firestore.newThought(group, currentText.text, Timestamp.now());
           currentText.clear();
         },
         backgroundColor: Theme.of(context).colorScheme.primary,  

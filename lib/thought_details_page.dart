@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:write_it_down/models/thought.dart';
 
 class ThoughtDetailsPage extends StatefulWidget {
-  const ThoughtDetailsPage({super.key});
-  //pass thought
+  const ThoughtDetailsPage({super.key, required this.thought});
+
+  final Thought thought;
+
   @override
   State<ThoughtDetailsPage> createState() => _ThoughtDetailsPageState();
 }
 
 class _ThoughtDetailsPageState extends State<ThoughtDetailsPage> {
-  var currentText = TextEditingController(text: "My thought");
+  late TextEditingController currentText;
+
+  @override
+  void initState() {
+    super.initState();
+    currentText = TextEditingController(text: widget.thought.content);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +34,7 @@ class _ThoughtDetailsPageState extends State<ThoughtDetailsPage> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                Center(child: Text("Wed 4 Feb 10:25PM")),
+                Center(child: Text(widget.thought.date.toDate().toString())),
                 Expanded(
                   child: TextField(
                     controller: currentText,
@@ -43,8 +52,8 @@ class _ThoughtDetailsPageState extends State<ThoughtDetailsPage> {
                   },
                   label: Row(
                     children: [
-                      Icon(Icons.add_box_rounded),
-                      Text("Throw thought"),
+                      Icon(Icons.update),
+                      Text("Update thought"),
                       ],
                     ),
                   backgroundColor: Theme.of(context).colorScheme.tertiary,

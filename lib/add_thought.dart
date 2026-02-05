@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'gemini.dart';
+import 'package:write_it_down/models/firestore.dart';
 
 class AddThought extends StatefulWidget {
   const AddThought({super.key});
@@ -9,8 +13,24 @@ class AddThought extends StatefulWidget {
 
 class _AddThoughtState extends State<AddThought> {
   final _pageController = PageController();
+  String groupName = "General";
+  String thoughtContent = "";
+
+  void updateGroup(String newGroupName) {
+    setState(() {
+      groupName = newGroupName;
+    });
+  }
+
+  void updateThought(String newThoughtContent) {
+    setState(() {
+      thoughtContent = newThoughtContent;
+    });
+  }
   @override
   Widget build(BuildContext context) {
+    final firestore = context.read<FirestoreService>();
+
     return DraggableScrollableSheet(
     initialChildSize: .9,
     maxChildSize: .9,
@@ -24,9 +44,9 @@ class _AddThoughtState extends State<AddThought> {
           controller: _pageController,
           physics: NeverScrollableScrollPhysics(),
           children: [
-            TypeThought(pageController: _pageController,),
-            ThoughtGroup(pageController: _pageController,),
-            GroupsSelection(pageController: _pageController,),
+            TypeThought(pageController: _pageController, updateGroup: updateGroup, firestore: firestore, updateThought: updateThought,),
+            ThoughtGroup(pageController: _pageController, groupName: groupName, firestore: firestore, thoughtContent: thoughtContent,),
+            GroupsSelection(pageController: _pageController, updateGroup: updateGroup, firestore: firestore,),
           ],
         ),
       );
@@ -38,23 +58,31 @@ class _AddThoughtState extends State<AddThought> {
 //----------------------------------
 
 class TypeThought extends StatefulWidget {
-  const TypeThought({super.key, required this.pageController});
+  const TypeThought({super.key, required this.pageController, required this.updateGroup, required this.firestore, required this.updateThought});
 
   final PageController pageController;
+  final Function(String) updateGroup;
+  final FirestoreService firestore;
+  final Function(String) updateThought;
 
   @override
   State<TypeThought> createState() => _TypeThoughtState();
 }
 
 class _TypeThoughtState extends State<TypeThought> {
+  var currentText = TextEditingController();
+
+
   @override
   Widget build(BuildContext context) {
+
     return Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Expanded(
               child: TextField(
+                controller: currentText,
                 autofocus: true,
                 expands: true,
                 maxLines: null,
@@ -67,7 +95,11 @@ class _TypeThoughtState extends State<TypeThought> {
               ),
             ),
             FloatingActionButton.extended(
-              onPressed: () {
+              onPressed: () async {
+                List<String> groups = await widget.firestore.currentGroups();
+                String groupName = await Gemini.group(groups, currentText.text);
+                widget.updateGroup(groupName);
+                widget.updateThought(currentText.text);
                 widget.pageController.nextPage(duration: Duration(milliseconds: 400), curve: Curves.ease);
               },
               label: Row(
@@ -87,9 +119,12 @@ class _TypeThoughtState extends State<TypeThought> {
 //----------------------------------
 
 class ThoughtGroup extends StatelessWidget {
-  const ThoughtGroup({super.key, required this.pageController});
+  const ThoughtGroup({super.key, required this.pageController, required this.groupName, required this.firestore, required this.thoughtContent});
   
   final PageController pageController;
+  final String groupName;
+  final FirestoreService firestore;
+  final String thoughtContent;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +146,7 @@ class ThoughtGroup extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       color: Theme.of(context).colorScheme.tertiary,
                     ),
-                    child: Center(child: Text("Outfits", style: TextStyle(fontSize: 30,))),
+                    child: Center(child: Text(groupName, style: TextStyle(fontSize: 30,))),
                   ),
                 ),
               ],
@@ -119,6 +154,7 @@ class ThoughtGroup extends StatelessWidget {
           ),
           FloatingActionButton.extended(
                 onPressed: () {
+                  firestore.newThought(groupName, thoughtContent, Timestamp.now());
                   Navigator.of(context).pop();
                 },
                 label: Row(
@@ -138,9 +174,11 @@ class ThoughtGroup extends StatelessWidget {
 //----------------------------------
 
 class GroupsSelection extends StatefulWidget {
-  const GroupsSelection({super.key, required this.pageController});
+  const GroupsSelection({super.key, required this.pageController, required this.updateGroup, required this.firestore});
   
   final PageController pageController;
+  final Function(String) updateGroup;
+  final FirestoreService firestore;
 
   @override
   State<GroupsSelection> createState() => _GroupsSelectionState();
@@ -153,24 +191,37 @@ class _GroupsSelectionState extends State<GroupsSelection> {
       children: [
         Text("Select a group"),
         Expanded(
-          child: ListView.builder(
-            itemCount: 30,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () => widget.pageController.jumpToPage(1),
-                child: Container(
-                  width: double.infinity,
-                  height: 50,
-                  margin: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Theme.of(context).colorScheme.tertiary,
+          child: StreamBuilder(
+            stream: widget.firestore.groupsRef.snapshots(), 
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final groups = snapshot.data!.docs;
+
+              return ListView.builder(
+              itemCount: groups.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    widget.updateGroup(groups[index]['name']);
+                    widget.pageController.jumpToPage(1);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 50,
+                    margin: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                    child: Text(groups[index]['name']),
                   ),
-                  child: Text("Group # $index"),
-                ),
-              );
-            }
-          ),
+                );
+              }
+            );
+            })
         ),
       ],
     );
