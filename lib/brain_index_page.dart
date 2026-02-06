@@ -49,7 +49,7 @@ class _BrainIndexPageState extends State<BrainIndexPage> {
                               title: Text(thoughts[tindex]['content']),
                               onTap: () => showModalBottomSheet(
                                 context: context, 
-                                builder: (context) => ThoughtDetailsPage(thought: thoughts[index].data(),),
+                                builder: (context) => ThoughtDetailsPage(thought: thoughts[tindex].data(), thoughtRef: thoughts[tindex].reference,),
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
                               ),

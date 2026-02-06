@@ -48,4 +48,10 @@ class FirestoreService extends ChangeNotifier{
     }
     return groups;
   }
+
+  void updateThought(DocumentReference<Thought> thoughtRef, String thoughtContent, Timestamp thoghtDate) async {
+    thoughtRef.update(Thought(content: thoughtContent, date: thoghtDate).toFireStore());  
+    notifyListeners();
+  }
+
 }

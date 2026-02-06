@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:write_it_down/models/firestore.dart';
 import 'package:write_it_down/models/thought.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ThoughtDetailsPage extends StatefulWidget {
-  const ThoughtDetailsPage({super.key, required this.thought});
+  const ThoughtDetailsPage({super.key, required this.thought, required this.thoughtRef});
 
   final Thought thought;
+  final DocumentReference<Thought> thoughtRef;
 
   @override
   State<ThoughtDetailsPage> createState() => _ThoughtDetailsPageState();
@@ -47,7 +50,7 @@ class _ThoughtDetailsPageState extends State<ThoughtDetailsPage> {
                 ),
                 FloatingActionButton.extended(
                   onPressed: () {
-                    //update thought
+                    FirestoreService().updateThought(widget.thoughtRef , currentText.text, Timestamp.now());
                     Navigator.pop(context);
                   },
                   label: Row(

@@ -71,4 +71,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'write-it-down-e07e5.firebasestorage.app',
     iosBundleId: 'com.example.writeItDown',
   );
+
 }
