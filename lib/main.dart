@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-//import 'oldhomepage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'home_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -8,6 +8,7 @@ import 'package:write_it_down/models/firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     ChangeNotifierProvider(
